@@ -19,8 +19,8 @@ const userSchema=new Schema({
     },
     role:{
         type:String,
-        enum:["admin","donor","recevier"],
-        required:true,
+        enum:["admin","user"],
+        default:"user"
     },
     bloodGroup:{
         type:String,
