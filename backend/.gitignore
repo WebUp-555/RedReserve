@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# environment variables
+.env
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# build outputs
+dist/
+build/
+
+# editor files
+.vscode/
+.idea/
+
+# coverage
+coverage/
+
+# lock files (optional – but recommended for teams)
+# package-lock.json
+# yarn.lock
