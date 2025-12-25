@@ -25,4 +25,5 @@ const bloodRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("BloodRequest", bloodRequestSchema);
+const BloodRequest = mongoose.model("BloodRequest", bloodRequestSchema);
+export default BloodRequest;

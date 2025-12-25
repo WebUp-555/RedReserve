@@ -1,6 +1,6 @@
-import BloodRequest from "../models/BloodRequest.js";
-import Inventory from "../models/Inventory.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import BloodRequest from "../models/requester.model.js";
+import Inventory from "../models/inventory.model.js";
+import  asyncHandler  from "../utils/Aysnchandler.js";
 import { ApiError } from "../utils/Apierror.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -37,9 +37,14 @@ export const getMyBloodRequests = asyncHandler(async (req, res) => {
 
 // ADMIN: view all requests
 export const getAllBloodRequests = asyncHandler(async (req, res) => {
+  console.log("=== GET ALL BLOOD REQUESTS ENDPOINT HIT ===");
+  console.log("User accessing:", req.user?.email, "Role:", req.user?.role);
+  
   const requests = await BloodRequest.find()
     .populate("requester", "name email")
     .sort({ createdAt: -1 });
+
+  console.log("Found", requests.length, "blood requests");
 
   res
     .status(200)

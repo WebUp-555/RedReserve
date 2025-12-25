@@ -1,7 +1,8 @@
-import Inventory from "../models/Inventory.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import Inventory from "../models/inventory.model.js";
+import  asyncHandler  from "../utils/Aysnchandler.js";
 import { ApiError } from "../utils/Apierror.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+
 
 // ADMIN: view inventory
 export const getInventory = asyncHandler(async (req, res) => {
