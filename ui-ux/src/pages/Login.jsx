@@ -33,9 +33,14 @@ export default function Login() {
       const response = await api.login(formData);
       
       if (response.data && response.data.accessToken) {
+        // Clear admin token if exists to prevent conflicts
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminUser");
+        
+        // Set user token
         localStorage.setItem("userToken", response.data.accessToken);
         localStorage.setItem("user", JSON.stringify(response.data.user));
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");

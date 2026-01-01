@@ -30,11 +30,15 @@ export default function AdminLogin() {
       const response = await api.adminLogin({ email, password });
       
       if (response.data && response.data.token) {
-        // Store token and admin data
+        // Clear user token if exists to prevent conflicts
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("user");
+        
+        // Store admin token and data
         localStorage.setItem("adminToken", response.data.token);
         localStorage.setItem("adminUser", JSON.stringify(response.data.admin));
         
-        navigate("/admin/inventory");
+        navigate("/admin/inventory", { replace: true });
       }
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");

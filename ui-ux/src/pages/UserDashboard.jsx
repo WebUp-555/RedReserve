@@ -10,13 +10,18 @@ export default function UserDashboard() {
   useEffect(() => {
     const token = localStorage.getItem("userToken");
     if (!token) {
-      navigate("/login");
+      navigate("/login", { replace: true });
       return;
     }
 
     const userData = localStorage.getItem("user");
     if (userData) {
-      setUser(JSON.parse(userData));
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error("Failed to parse user data:", error);
+        navigate("/login", { replace: true });
+      }
     }
   }, [navigate]);
 
@@ -28,6 +33,9 @@ export default function UserDashboard() {
     } finally {
       localStorage.removeItem("userToken");
       localStorage.removeItem("user");
+      // Also clear admin tokens in case they exist
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminUser");
       navigate("/login");
     }
   };

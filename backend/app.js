@@ -28,5 +28,27 @@ app.use('/api/blood-requests', bloodRequestRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/donations', donorRoutes);
 
+// Global error handler - must be after all routes
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
+    
+    res.status(statusCode).json({
+        success: false,
+        statusCode,
+        message,
+        errors: err.errors || []
+    });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: 'Route not found'
+    });
+});
+
 
 export default app;

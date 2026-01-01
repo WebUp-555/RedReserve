@@ -7,12 +7,17 @@ import Inventory from "../models/inventory.model.js";
 
 
 export const bookDonation= asyncHandler(async (req, res) => {
+    // Prevent admins from booking donations as users
+    if (req.user.role === "admin") {
+        throw new ApiError(403, "Admins cannot book donations. Please use a regular user account.");
+    }
+    
     const {  appointmentDate, bloodGroup } = req.body;
     if (!appointmentDate || !bloodGroup) {
         throw new ApiError(400, "Appointment date and blood group are required");
       }
       const donation=await Appointment.create({
-        donor:req.user._id,
+        donorId:req.user._id,
         appointmentDate,    
         bloodGroup,
         status:"pending"
@@ -21,12 +26,12 @@ export const bookDonation= asyncHandler(async (req, res) => {
 });
 
 export const getMyDonations= asyncHandler(async (req, res) => {
-    const donations= await Appointment.find({donor:req.user._id}).sort({createdAt:-1});
+    const donations= await Appointment.find({donorId:req.user._id}).sort({createdAt:-1});
     return res.status(200).json(new ApiResponse(200,donations,"My donation appointments"));
 });
 
 export const getAllDonations= asyncHandler(async (req, res) => {
-    const donations= await Appointment.find().populate("donor","name email").sort({createdAt:-1});
+    const donations= await Appointment.find().populate("donorId","name email").sort({createdAt:-1});
     return res.status(200).json(new ApiResponse(200,donations,"All donation appointments"));
 });
 

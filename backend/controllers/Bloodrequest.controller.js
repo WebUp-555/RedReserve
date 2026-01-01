@@ -6,16 +6,25 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 // USER: create blood request
 export const createBloodRequest = asyncHandler(async (req, res) => {
-  const { bloodGroup, units } = req.body;
+  // Prevent admins from creating requests as users
+  if (req.user.role === "admin") {
+    throw new ApiError(403, "Admins cannot create blood requests. Please use a regular user account.");
+  }
+  
+  const { bloodGroup, unitsRequested, urgency, reason, hospitalName, contactNumber } = req.body;
 
-  if (!bloodGroup || !units) {
-    throw new ApiError(400, "Blood group and units are required");
+  if (!bloodGroup || !unitsRequested || !reason || !hospitalName || !contactNumber) {
+    throw new ApiError(400, "All required fields must be provided");
   }
 
   const request = await BloodRequest.create({
-    requester: req.user._id,
+    userId: req.user._id,
     bloodGroup,
-    units,
+    unitsRequested,
+    urgency: urgency || "normal",
+    reason,
+    hospitalName,
+    contactNumber,
     status: "pending",
   });
 
@@ -27,7 +36,7 @@ export const createBloodRequest = asyncHandler(async (req, res) => {
 // USER: view own requests
 export const getMyBloodRequests = asyncHandler(async (req, res) => {
   const requests = await BloodRequest.find({
-    requester: req.user._id,
+    userId: req.user._id,
   }).sort({ createdAt: -1 });
 
   res
@@ -37,14 +46,9 @@ export const getMyBloodRequests = asyncHandler(async (req, res) => {
 
 // ADMIN: view all requests
 export const getAllBloodRequests = asyncHandler(async (req, res) => {
-  console.log("=== GET ALL BLOOD REQUESTS ENDPOINT HIT ===");
-  console.log("User accessing:", req.user?.email, "Role:", req.user?.role);
-  
   const requests = await BloodRequest.find()
-    .populate("requester", "name email")
+    .populate("userId", "name email")
     .sort({ createdAt: -1 });
-
-  console.log("Found", requests.length, "blood requests");
 
   res
     .status(200)
@@ -68,11 +72,11 @@ export const approveBloodRequest = asyncHandler(async (req, res) => {
     bloodGroup: request.bloodGroup,
   });
 
-  if (!inventory || inventory.unitsAvailable < request.units) {
+  if (!inventory || inventory.unitsAvailable < request.unitsRequested) {
     throw new ApiError(400, "Insufficient stock");
   }
 
-  inventory.unitsAvailable -= request.units;
+  inventory.unitsAvailable -= request.unitsRequested;
   await inventory.save();
 
   request.status = "approved";

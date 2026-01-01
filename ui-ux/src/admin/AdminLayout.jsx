@@ -7,10 +7,10 @@ export default function AdminLayout() {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if user is authenticated
+    // Check if admin is authenticated
     const token = localStorage.getItem("adminToken");
     if (!token) {
-      navigate("/admin/login");
+      navigate("/admin/login", { replace: true });
     }
   }, [navigate]);
 
@@ -22,6 +22,9 @@ export default function AdminLayout() {
     } finally {
       localStorage.removeItem("adminToken");
       localStorage.removeItem("adminUser");
+      // Also clear user tokens in case they exist
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("user");
       navigate("/admin/login");
     }
   };

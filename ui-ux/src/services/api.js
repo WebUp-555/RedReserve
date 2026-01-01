@@ -8,8 +8,13 @@ class ApiService {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
     
-    // Get token from localStorage
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('userToken');
+    // Determine which token to use based on the endpoint
+    let token;
+    if (endpoint.startsWith('/api/admin')) {
+      token = localStorage.getItem('adminToken');
+    } else {
+      token = localStorage.getItem('userToken');
+    }
     
     const config = {
       ...options,
@@ -23,15 +28,29 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server error. Please make sure the backend is running.');
+      }
+      
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
+        // Extract meaningful error message from backend
+        const errorMessage = data.message || data.error || 'Something went wrong';
+        throw new Error(errorMessage);
       }
 
       return data;
     } catch (error) {
-      throw error;
+      // If it's already our custom error, rethrow it
+      if (error.message) {
+        throw error;
+      }
+      // Handle network errors
+      throw new Error('Network error. Please check your connection.');
     }
   }
 

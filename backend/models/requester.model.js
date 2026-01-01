@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const bloodRequestSchema = new mongoose.Schema(
   {
-    requester: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -11,10 +11,28 @@ const bloodRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    units: {
+    unitsRequested: {
       type: Number,
       required: true,
       min: 1,
+      max: 10,
+    },
+    urgency: {
+      type: String,
+      enum: ["normal", "urgent", "critical"],
+      default: "normal",
+    },
+    reason: {
+      type: String,
+      required: true,
+    },
+    hospitalName: {
+      type: String,
+      required: true,
+    },
+    contactNumber: {
+      type: String,
+      required: true,
     },
     status: {
       type: String,

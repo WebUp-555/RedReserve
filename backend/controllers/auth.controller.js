@@ -39,36 +39,27 @@ export const register= asyncHandler(async (req,res)=>{
         role:"user"});
         return res.status(201).json(new ApiResponse(201,{id: user._id,name: user.name,email: user.email},"User registered successfully"));});
 const loginUser = asyncHandler(async (req, res) => {
-    //req body -> data
-    //username or email 
-    //find the User
-    //password check
-    //access and refresh token
-    //send cookie
-    //return response
-
  const{username,email,password}=req.body
- console.log(email);
+ 
  if(!username && !email){
    throw new ApiError(400,"Username or email is required")
  }
-
-   //Here is an alternative to the above logic discussion
-   //if(!(username || email)){
-   // throw new ApiError(400,"Username or email is required")
-   //}
 
 const user = await User.findOne({
   $or: [{ username }, { email }]
  })
   if(!user){
+    console.log(`❌ Login failed - User not found: ${email || username}`);
     throw new ApiError(404,"User does not exist")
   }
   
   const isPasswordValid= await user.isPasswordCorrect(password)
   if(!isPasswordValid){
+    console.log(`❌ Login failed - Invalid password: ${user.email}`);
     throw new ApiError(401,"Invalid user password")
   }
+  
+  console.log(`✅ User logged in: ${user.email} (${user.role})`);
 
  const {accessToken, refreshToken} = await
   generateAccessTokenAndRefreshToken(user._id)
