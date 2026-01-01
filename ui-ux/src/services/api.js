@@ -10,7 +10,8 @@ class ApiService {
     
     // Determine which token to use based on the endpoint
     let token;
-    if (endpoint.startsWith('/api/admin')) {
+    if (endpoint.startsWith('/api/admin') || 
+        endpoint.startsWith('/api/inventory')) {
       token = localStorage.getItem('adminToken');
     } else {
       token = localStorage.getItem('userToken');

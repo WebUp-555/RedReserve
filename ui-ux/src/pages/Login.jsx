@@ -5,7 +5,7 @@ import api from "../services/api";
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "",
+    emailOrUsername: "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -22,7 +22,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    if (!formData.email || !formData.password) {
+    if (!formData.emailOrUsername || !formData.password) {
       setError("Please fill in all fields");
       return;
     }
@@ -30,7 +30,14 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await api.login(formData);
+      // Determine if input is email or username
+      const isEmail = formData.emailOrUsername.includes("@");
+      const loginPayload = {
+        password: formData.password,
+        ...(isEmail ? { email: formData.emailOrUsername } : { username: formData.emailOrUsername })
+      };
+
+      const response = await api.login(loginPayload);
       
       if (response.data && response.data.accessToken) {
         // Clear admin token if exists to prevent conflicts
@@ -50,84 +57,105 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h1 className="text-center text-3xl font-bold text-primary">
-            RedReserve
-          </h1>
-          <h2 className="mt-6 text-center text-2xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{" "}
-            <Link
-              to="/register"
-              className="font-medium text-primary hover:text-primary-dark"
-            >
-              create a new account
-            </Link>
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-block p-3 bg-gradient-to-br from-primary to-primary-dark rounded-2xl mb-4">
+            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.5 1.5H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V8.25m0-5v5m0-5H10v5h5V3.25m-7.5 8.5h5m-5 3h5" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">RedReserve</h1>
+          <p className="text-gray-600">Save lives. Donate blood. Make a difference.</p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        {/* Form Card */}
+        <form className="card-premium p-8 space-y-6 mb-6" onSubmit={handleSubmit}>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Sign in</h2>
+            <p className="text-gray-600 text-sm mt-1">Access your blood donation account</p>
+          </div>
+
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
-              {error}
+            <div className="p-4 bg-red-50 border-l-4 border-red-600 text-red-700 rounded-lg text-sm">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span>{error}</span>
+              </div>
             </div>
           )}
 
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                disabled={isLoading}
-                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                disabled={isLoading}
-                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="Password"
-              />
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
+          <div className="space-y-2">
+            <label htmlFor="emailOrUsername" className="block text-sm font-semibold text-gray-700">
+              Email or Username
+            </label>
+            <input
+              id="emailOrUsername"
+              type="text"
+              name="emailOrUsername"
+              value={formData.emailOrUsername}
+              onChange={handleChange}
+              placeholder="you@example.com or username"
+              className="input-premium"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </button>
+            />
           </div>
 
-          <div className="text-center text-sm">
-            <Link to="/admin/login" className="text-gray-600 hover:text-gray-900">
-              Admin Login →
-            </Link>
+          <div className="space-y-2">
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              className="input-premium"
+              disabled={isLoading}
+            />
           </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="btn-primary w-full py-3 font-semibold flex items-center justify-center space-x-2"
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Signing in...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </>
+            )}
+          </button>
         </form>
+
+        {/* Signup Link */}
+        <div className="text-center">
+          <p className="text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-semibold text-primary hover:text-primary-dark transition-colors"
+            >
+              Create one
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

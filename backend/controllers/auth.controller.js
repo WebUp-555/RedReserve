@@ -45,9 +45,12 @@ const loginUser = asyncHandler(async (req, res) => {
    throw new ApiError(400,"Username or email is required")
  }
 
-const user = await User.findOne({
-  $or: [{ username }, { email }]
- })
+// Build query with only provided fields
+const query = {};
+if (email) query.email = email;
+if (username) query.username = username;
+
+const user = await User.findOne(query)
   if(!user){
     console.log(`❌ Login failed - User not found: ${email || username}`);
     throw new ApiError(404,"User does not exist")
@@ -55,7 +58,7 @@ const user = await User.findOne({
   
   const isPasswordValid= await user.isPasswordCorrect(password)
   if(!isPasswordValid){
-    console.log(`❌ Login failed - Invalid password: ${user.email}`);
+    console.log(`❌ Login failed - Invalid password for email: ${email} (found user: ${user.email})`);
     throw new ApiError(401,"Invalid user password")
   }
   
