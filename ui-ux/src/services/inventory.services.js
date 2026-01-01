@@ -1,5 +1,4 @@
-const API_URL = "http://localhost:5000/api/inventory"; 
-// later replace with deployed backend URL
+const API_URL = `${import.meta.env.VITE_API_URL}/api/inventory`;
 
 export const getInventory = async (token) => {
   const res = await fetch(API_URL, {
