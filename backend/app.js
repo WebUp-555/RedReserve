@@ -8,11 +8,11 @@ import bloodRequestRoutes from "./routes/Bloodrequest.routes.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
 import donorRoutes from "./routes/donor.routes.js";
 
-const app = express;
+const app = express();
 
 app.use(
   cors({
-    origin: true,          
+    origin: process.env.FRONTEND_URL ,          
     credentials: true,    
   })
 );
