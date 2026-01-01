@@ -12,18 +12,13 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL ,          
-    credentials: true,    
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
   })
 );
 
-
-app.options("/*", cors());
-
-
 app.use(express.json());
 app.use(cookieParser());
-
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
@@ -31,14 +26,12 @@ app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/donations", donorRoutes);
 
-
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
   });
 });
-
 
 app.use((req, res) => {
   res.status(404).json({
