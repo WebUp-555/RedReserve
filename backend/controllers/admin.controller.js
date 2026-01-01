@@ -24,23 +24,39 @@ export const adminLogin = asyncHandler(async (req, res) => {
   }
 
   const token = admin.generateAccessToken();
+  const refreshToken = admin.generateRefreshToken();
+  
+  // Save refresh token
+  admin.refreshToken = refreshToken;
+  await admin.save({ validateBeforeSave: false });
+  
   console.log(`✅ Admin logged in: ${admin.email} (${admin.role})`);
 
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        token,
-        admin: {
-          id: admin._id,
-          email: admin.email,
-          name: admin.name,
-          role: admin.role,
+  const options = {
+    httpOnly: true,
+    secure: true
+  };
+
+  res
+    .status(200)
+    .cookie("adminAccessToken", token, options)
+    .cookie("adminRefreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          token,
+          refreshToken,
+          admin: {
+            id: admin._id,
+            email: admin.email,
+            name: admin.name,
+            role: admin.role,
+          },
         },
-      },
-      "Admin login successful"
-    )
-  );
+        "Admin login successful"
+      )
+    );
 });
 
 export const getAllUsers = asyncHandler(async (req, res) => {
@@ -67,7 +83,17 @@ export const adminlogout=asyncHandler(async (req,res)=>{
     const admin=req.user;
     admin.refreshToken=null;
     await admin.save();
-    res.status(200).json(
+    
+    const options = {
+      httpOnly: true,
+      secure: true
+    };
+    
+    res
+      .status(200)
+      .clearCookie("adminAccessToken", options)
+      .clearCookie("adminRefreshToken", options)
+      .json(
         new ApiResponse(200, null, "Admin logged out successfully")
-    );
+      );
 });

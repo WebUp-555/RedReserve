@@ -48,7 +48,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // Build query with only provided fields
 const query = {};
 if (email) query.email = email;
-if (username) query.username = username;
+if (username) query.name = username; // Map username to name field in database
 
 const user = await User.findOne(query)
   if(!user){

@@ -6,10 +6,11 @@ import { ApiError } from "../utils/Apierror.js";
 export const verifyJWT = asyncHandler(async (req, _, next) => {
   const authHeader = req.headers.authorization;
   
+  // Check for Bearer token first, then check cookies (both user and admin)
   const token =
     authHeader?.startsWith("Bearer ")
       ? authHeader.split(" ")[1]
-      : req.cookies?.accessToken;
+      : req.cookies?.accessToken || req.cookies?.adminAccessToken;
 
   if (!token) {
     throw new ApiError(401, "Unauthorized request");

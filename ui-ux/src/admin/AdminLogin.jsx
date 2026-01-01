@@ -30,10 +30,6 @@ export default function AdminLogin() {
       const response = await api.adminLogin({ email, password });
       
       if (response.data && response.data.token) {
-        // Clear user token if exists to prevent conflicts
-        localStorage.removeItem("userToken");
-        localStorage.removeItem("user");
-        
         // Store admin token and data
         localStorage.setItem("adminToken", response.data.token);
         localStorage.setItem("adminUser", JSON.stringify(response.data.admin));
@@ -155,11 +151,6 @@ export default function AdminLogin() {
               )}
             </button>
           </form>
-
-          <p className="text-center text-gray-600 text-sm mt-6">
-            <span className="text-gray-500">Demo: </span>
-            <span className="font-mono text-gray-700">shamsheer@gmail.com</span>
-          </p>
         </div>
       </div>
     </div>

@@ -68,12 +68,23 @@ export const approveBloodRequest = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Request already processed");
   }
 
-  const inventory = await Inventory.findOne({
+  // First, try to find exact blood group match
+  let inventory = await Inventory.findOne({
     bloodGroup: request.bloodGroup,
   });
 
+  // If not enough of the exact blood group, check for O- (universal donor)
   if (!inventory || inventory.unitsAvailable < request.unitsRequested) {
-    throw new ApiError(400, "Insufficient stock");
+    // O- is universal and can be given to anyone
+    const oNegativeInventory = await Inventory.findOne({
+      bloodGroup: "O-",
+    });
+
+    if (oNegativeInventory && oNegativeInventory.unitsAvailable >= request.unitsRequested) {
+      inventory = oNegativeInventory;
+    } else {
+      throw new ApiError(400, "Insufficient stock");
+    }
   }
 
   inventory.unitsAvailable -= request.unitsRequested;

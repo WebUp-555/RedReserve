@@ -34,8 +34,6 @@ export default function UserDashboard() {
     } finally {
       localStorage.removeItem("userToken");
       localStorage.removeItem("user");
-      localStorage.removeItem("adminToken");
-      localStorage.removeItem("adminUser");
       navigate("/login");
     }
   };

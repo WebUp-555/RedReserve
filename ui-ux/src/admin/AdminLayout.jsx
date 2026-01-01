@@ -34,8 +34,6 @@ export default function AdminLayout() {
     } finally {
       localStorage.removeItem("adminToken");
       localStorage.removeItem("adminUser");
-      localStorage.removeItem("userToken");
-      localStorage.removeItem("user");
       navigate("/admin/login");
     }
   };
