@@ -44,3 +44,32 @@ export const adminLogin = asyncHandler(async (req, res) => {
     )
   );
 });
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({ role: "user" }).select("-password -refreshToken");
+  res.status(200).json(
+    new ApiResponse(200, users, "Fetched all users successfully")
+  );
+});
+
+export const deleteUser = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+  const user = await User.findById(userId);
+
+  if (!user || user.role !== "user") {
+    throw new ApiError(404, "User not found");
+  }
+
+  await user.remove();
+  res.status(200).json(
+    new ApiResponse(200, null, "User deleted successfully")
+  );
+});
+export const adminlogout=asyncHandler(async (req,res)=>{
+    const admin=req.user;
+    admin.refreshToken=null;
+    await admin.save();
+    res.status(200).json(
+        new ApiResponse(200, null, "Admin logged out successfully")
+    );
+});
