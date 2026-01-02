@@ -109,6 +109,7 @@ export default function Register() {
               onChange={handleChange}
               placeholder="John Doe"
               className="input-premium"
+              autoComplete="name"
               disabled={isLoading}
             />
           </div>
@@ -125,6 +126,7 @@ export default function Register() {
               onChange={handleChange}
               placeholder="you@example.com"
               className="input-premium"
+              autoComplete="email"
               disabled={isLoading}
             />
           </div>
@@ -141,6 +143,7 @@ export default function Register() {
               onChange={handleChange}
               placeholder="••••••••"
               className="input-premium"
+              autoComplete="new-password"
               disabled={isLoading}
             />
             <p className="text-xs text-gray-600">Minimum 6 characters</p>

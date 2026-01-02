@@ -10,5 +10,6 @@ const router = express.Router();
 
 router.get("/", verifyJWT, isAdmin, getInventory);
 router.put("/", verifyJWT, isAdmin, updateInventory);
+router.put("/:id", verifyJWT, isAdmin, updateInventory);
 
 export default router;

@@ -96,6 +96,7 @@ export default function Login() {
               onChange={handleChange}
               placeholder="you@example.com or username"
               className="input-premium"
+              autoComplete="username"
               disabled={isLoading}
             />
           </div>
@@ -112,6 +113,7 @@ export default function Login() {
               onChange={handleChange}
               placeholder="••••••••"
               className="input-premium"
+              autoComplete="current-password"
               disabled={isLoading}
             />
           </div>

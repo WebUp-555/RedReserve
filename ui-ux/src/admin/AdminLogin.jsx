@@ -109,6 +109,7 @@ export default function AdminLogin() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@redreserve.com"
                 className="input-premium"
+                autoComplete="email"
                 disabled={isLoading}
               />
             </div>
@@ -124,6 +125,7 @@ export default function AdminLogin() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="input-premium"
+                autoComplete="current-password"
                 disabled={isLoading}
               />
             </div>
