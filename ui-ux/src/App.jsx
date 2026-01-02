@@ -6,6 +6,7 @@ import AdminLayout from "./admin/AdminLayout";
 import Inventory from "./admin/Inventory";
 import BloodRequests from "./admin/BloodRequest";
 import Donations from "./admin/Donations";
+import User from "./admin/User";
 
 // user
 import Login from "./pages/Login";
@@ -47,6 +48,7 @@ function App() {
           <Route path="inventory" element={<Inventory />} />
           <Route path="requests" element={<BloodRequests />} />
           <Route path="donations" element={<Donations />} />
+          <Route path="users" element={<User />} />
         </Route>
 
     </Routes>

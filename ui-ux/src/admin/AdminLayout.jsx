@@ -46,6 +46,7 @@ export default function AdminLayout() {
     { path: "/admin/inventory", label: "📦 Inventory", icon: "📦" },
     { path: "/admin/requests", label: "📋 Blood Requests", icon: "📋" },
     { path: "/admin/donations", label: "🩸 Donations", icon: "🩸" },
+    { path: "/admin/users", label: "👥 Users", icon: "👥" },
   ];
 
   return (
