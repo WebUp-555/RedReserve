@@ -68,13 +68,13 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
 export const deleteUser = asyncHandler(async (req, res) => {
   const userId = req.params.id;
-  const user = await User.findByIdAndDelete(userId);
+  const user = await User.findById(userId);
 
   if (!user || user.role !== "user") {
     throw new ApiError(404, "User not found");
   }
 
-  await user.remove();
+  await User.findByIdAndDelete(userId);
   res.status(200).json(
     new ApiResponse(200, null, "User deleted successfully")
   );
