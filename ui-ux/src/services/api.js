@@ -240,6 +240,28 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  // AI endpoints
+  async askBloodAssistant(question) {
+    return this.request('/api/ai/ask-blood-assistant', {
+      method: 'POST',
+      body: JSON.stringify({ question }),
+    });
+  }
+
+  async parseDonationAppointment(text) {
+    return this.request('/api/ai/parse-donation-appointment', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+  }
+
+  async parseBloodRequest(text) {
+    return this.request('/api/ai/parse-blood-request', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+  }
 }
 
 export default new ApiService();

@@ -17,12 +17,59 @@ export default function RequestBlood() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [showAiPanel, setShowAiPanel] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleAIAutofill = async (e) => {
+    e.preventDefault();
+    if (!aiInput.trim()) {
+      setError("Please describe your blood request to use AI autofill");
+      return;
+    }
+
+    setAiLoading(true);
+    setError("");
+
+    try {
+      const response = await api.parseBloodRequest(aiInput);
+
+      const data = response.data || response;
+      
+      // Map urgencyLevel to urgency field
+      const urgencyMap = {
+        "Critical": "critical",
+        "Urgent": "urgent",
+        "Normal": "normal"
+      };
+
+      setFormData((prev) => ({
+        ...prev,
+        bloodGroup: data.bloodGroupRequired !== "UNKNOWN" ? data.bloodGroupRequired : prev.bloodGroup,
+        unitsRequested: data.unitsRequested || prev.unitsRequested,
+        urgency: urgencyMap[data.urgencyLevel] || prev.urgency,
+        hospitalName: data.hospitalName || prev.hospitalName,
+        contactNumber: data.contactNumber || prev.contactNumber,
+        reason: data.reasonForRequest || prev.reason,
+      }));
+
+      setSuccess("Form autofilled successfully from AI!");
+      setAiInput("");
+      setShowAiPanel(false);
+      
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to autofill form. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -61,9 +108,53 @@ export default function RequestBlood() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Request Blood
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Request Blood
+          </h2>
+          <button
+            onClick={() => setShowAiPanel(!showAiPanel)}
+            className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg text-sm font-semibold transition-all"
+            title="Use AI to autofill form"
+          >
+            ✨ AI Autofill
+          </button>
+        </div>
+
+        {showAiPanel && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-lg">
+            <h3 className="font-semibold text-red-900 mb-3">AI Blood Request Assistant</h3>
+            <p className="text-sm text-red-800 mb-3">
+              Describe your blood request naturally. AI will extract and fill the form automatically.
+            </p>
+            <form onSubmit={handleAIAutofill} className="space-y-3">
+              <textarea
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                placeholder="E.g., 'Patient needs 2 units of AB+ blood urgently for emergency surgery at City Hospital. Contact: 03001234567. Patient had an accident and needs immediate transfusion.'"
+                disabled={aiLoading}
+                className="w-full px-3 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                rows="3"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={aiLoading || !aiInput.trim()}
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white rounded-lg font-semibold text-sm transition-colors"
+                >
+                  {aiLoading ? "Processing..." : "Autofill Form"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAiPanel(false)}
+                  className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">

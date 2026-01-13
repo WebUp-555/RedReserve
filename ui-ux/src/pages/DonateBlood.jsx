@@ -14,12 +14,49 @@ export default function DonateBlood() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [showAiPanel, setShowAiPanel] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleAIAutofill = async (e) => {
+    e.preventDefault();
+    if (!aiInput.trim()) {
+      setError("Please describe your appointment to use AI autofill");
+      return;
+    }
+
+    setAiLoading(true);
+    setError("");
+
+    try {
+      const response = await api.parseDonationAppointment(aiInput);
+
+      const data = response.data || response;
+      
+      setFormData((prev) => ({
+        ...prev,
+        bloodGroup: data.bloodGroup !== "UNKNOWN" ? data.bloodGroup : prev.bloodGroup,
+        appointmentDate: data.preferredDate || prev.appointmentDate,
+        medicalHistory: data.medicalHistory || prev.medicalHistory,
+      }));
+
+      setSuccess("Form autofilled successfully from AI!");
+      setAiInput("");
+      setShowAiPanel(false);
+      
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to autofill form. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -63,9 +100,53 @@ export default function DonateBlood() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Book Blood Donation Appointment
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Book Blood Donation Appointment
+          </h2>
+          <button
+            onClick={() => setShowAiPanel(!showAiPanel)}
+            className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg text-sm font-semibold transition-all"
+            title="Use AI to autofill form"
+          >
+            ✨ AI Autofill
+          </button>
+        </div>
+
+        {showAiPanel && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-lg">
+            <h3 className="font-semibold text-red-900 mb-3">AI Donation Assistant</h3>
+            <p className="text-sm text-red-800 mb-3">
+              Describe your donation appointment details naturally. AI will extract and fill the form automatically.
+            </p>
+            <form onSubmit={handleAIAutofill} className="space-y-3">
+              <textarea
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                placeholder="E.g., 'I want to donate O+ blood on January 20th. I had a surgery 6 months ago but I'm healthy now.'"
+                disabled={aiLoading}
+                className="w-full px-3 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                rows="3"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={aiLoading || !aiInput.trim()}
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white rounded-lg font-semibold text-sm transition-colors"
+                >
+                  {aiLoading ? "Processing..." : "Autofill Form"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAiPanel(false)}
+                  className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">

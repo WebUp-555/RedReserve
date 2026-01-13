@@ -51,14 +51,12 @@ export default function RedreserveAssistant() {
 
     try {
       // Call the AI assistant API
-      const response = await api.post('/api/ai/ask-blood-assistant', {
-        question: inputValue,
-      });
+      const response = await api.askBloodAssistant(inputValue);
 
       const botMessage = {
         id: messages.length + 2,
         type: 'bot',
-        text: response.data.answer,
+        text: response.answer,
         timestamp: new Date(),
       };
 
