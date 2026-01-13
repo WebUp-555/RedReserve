@@ -58,7 +58,7 @@ export default function RedreserveAssistant() {
       const botMessage = {
         id: messages.length + 2,
         type: 'bot',
-        text: response.data.response || response.response,
+        text: response.data.answer,
         timestamp: new Date(),
       };
 
