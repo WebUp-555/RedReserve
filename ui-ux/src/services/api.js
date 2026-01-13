@@ -14,7 +14,8 @@ class ApiService {
         endpoint.startsWith('/api/inventory')) {
       token = localStorage.getItem('adminToken');
     } else {
-      token = localStorage.getItem('userToken');
+      // For other endpoints, try admin token first, then user token
+      token = localStorage.getItem('adminToken') || localStorage.getItem('userToken');
     }
     
     const config = {

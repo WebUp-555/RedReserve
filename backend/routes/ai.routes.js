@@ -5,9 +5,15 @@ import {parseBloodRequestAI} from '../controllers/ai.bloodreqautofill.js';
 import {parseDonationAppointmentAI} from '../controllers/ai.donationautofill.js';
 const router = express.Router();
 
-// AI Assistant route
-router.post('/ask-blood-assistant', verifyJWT, askBloodAssistant);
-router.post('/parse-blood-request', verifyJWT, parseBloodRequestAI);
-router.post('/parse-donation-appointment', verifyJWT, parseDonationAppointmentAI);
+// Middleware to allow both users and admins
+const allowUserAndAdmin = (req, res, next) => {
+  // User is already verified by verifyJWT, just allow access
+  next();
+};
+
+// AI Assistant route - available for both users and admins
+router.post('/ask-blood-assistant', verifyJWT, allowUserAndAdmin, askBloodAssistant);
+router.post('/parse-blood-request', verifyJWT, allowUserAndAdmin, parseBloodRequestAI);
+router.post('/parse-donation-appointment', verifyJWT, allowUserAndAdmin, parseDonationAppointmentAI);
 
 export default router;

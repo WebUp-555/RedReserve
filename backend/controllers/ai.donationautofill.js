@@ -39,7 +39,15 @@ JSON format:
 
 Rules:
 - If blood group not mentioned, use "UNKNOWN"
-- If date not clearly mentioned, use null
+- Parse dates intelligently:
+  * "tomorrow" = next day's date
+  * "today" = today's date
+  * "next week" = 7 days from today
+  * "next month" = 30 days from today
+  * Specific dates like "Jan 15" or "15 January" = calculate actual date
+  * If unclear, use null
+- Current date: ${new Date().toISOString().split('T')[0]}
+- Always return dates in YYYY-MM-DD format
 - medicalHistory is optional, keep short
 `;
 
