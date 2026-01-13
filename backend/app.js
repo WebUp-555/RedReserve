@@ -7,6 +7,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import bloodRequestRoutes from "./routes/Bloodrequest.routes.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
 import donorRoutes from "./routes/donor.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/donations", donorRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).json({
