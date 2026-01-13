@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
+import RedreserveAssistant from "../components/RedreserveAssistant";
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -258,6 +259,9 @@ export default function UserDashboard() {
           </div>
         )}
       </main>
+      
+      {/* Redreserve AI Assistant */}
+      <RedreserveAssistant />
     </div>
   );
 }

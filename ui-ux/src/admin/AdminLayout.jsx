@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import RedreserveAssistant from "../components/RedreserveAssistant";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -131,6 +132,9 @@ export default function AdminLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Redreserve AI Assistant */}
+      <RedreserveAssistant />
     </div>
   );
 }
