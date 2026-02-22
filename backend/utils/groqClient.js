@@ -23,7 +23,7 @@ export const generateGroqText = async ({
   maxOutputTokens = 256,
 }) => {
   const client = getGroqClient();
-  const model = process.env.GROQ_MODEL || "llama-3.1-70b-versatile";
+  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120";
 
   const completion = await client.chat.completions.create({
     model,
@@ -62,7 +62,7 @@ export const mapGroqError = (error) => {
   }
 
   if (statusCode === 404 || lowerMessage.includes("model") && lowerMessage.includes("not found")) {
-    return new ApiError(500, "Configured Groq model is unavailable. Set GROQ_MODEL=llama-3.1-70b-versatile.");
+    return new ApiError(500, "Configured Groq model is unavailable. Set GROQ_MODEL=openai/gpt-oss-120.");
   }
 
   return new ApiError(500, message);
