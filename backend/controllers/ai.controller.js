@@ -1,22 +1,8 @@
 import asyncHandler from '../utils/Aysnchandler.js';
 import { ApiError } from '../utils/Apierror.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
-import OpenAI from "openai";
 import AIQuery from "../models/AIQuery.js";
-
-// Lazy initialization of OpenAI client to ensure env vars are loaded
-let openai;
-const getOpenAIClient = () => {
-  if (!openai) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not set in environment variables');
-    }
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
-  return openai;
-};
+import { generateGeminiText, mapGeminiError } from '../utils/geminiClient.js';
 
 export const askBloodAssistant = asyncHandler(async (req, res) => {
   const { question } = req.body;
@@ -38,18 +24,17 @@ STRICT RULES:
 - Always prioritize donor safety
 `;
 
-  const client = getOpenAIClient();
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: question },
-    ],
-    temperature: 0.2,
-    max_tokens: 200,
-  });
-
-  const answer = response.choices[0].message.content.trim();
+  let answer;
+  try {
+    answer = await generateGeminiText({
+      systemInstruction: systemPrompt,
+      userPrompt: question,
+      temperature: 0.2,
+      maxOutputTokens: 220,
+    });
+  } catch (error) {
+    throw mapGeminiError(error);
+  }
 
   // Save for audit/logging
   await AIQuery.create({

@@ -1,21 +1,7 @@
 import asyncHandler from '../utils/Aysnchandler.js';
 import { ApiError } from '../utils/Apierror.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
-import OpenAI from "openai";
-
-// Lazy initialization of OpenAI client to ensure env vars are loaded
-let openai;
-const getOpenAIClient = () => {
-  if (!openai) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not set in environment variables');
-    }
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
-  return openai;
-};
+import { generateGeminiText, extractJsonText, mapGeminiError } from '../utils/geminiClient.js';
 
 export const parseDonationAppointmentAI = asyncHandler(async (req, res) => {
   const { text } = req.body;
@@ -51,22 +37,22 @@ Rules:
 - medicalHistory is optional, keep short
 `;
 
-  const client = getOpenAIClient();
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: text },
-    ],
-    temperature: 0.1,
-    max_tokens: 200,
-  });
-
-  const raw = response.choices[0].message.content.trim();
+  let raw;
+  try {
+    raw = await generateGeminiText({
+      systemInstruction: systemPrompt,
+      userPrompt: text,
+      temperature: 0.1,
+      maxOutputTokens: 220,
+      responseMimeType: "application/json",
+    });
+  } catch (error) {
+    throw mapGeminiError(error);
+  }
 
   let data;
   try {
-    data = JSON.parse(raw);
+    data = JSON.parse(extractJsonText(raw));
   } catch (err) {
     res.status(500);
     throw new Error("AI failed to generate valid JSON. Try again clearly.");
