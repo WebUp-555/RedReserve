@@ -2,6 +2,24 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ApiError } from "./Apierror.js";
 
 let geminiModel;
+let resolvedModelName;
+
+const DEFAULT_MODEL_CANDIDATES = [
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-1.5-flash-latest",
+  "gemini-1.5-pro-latest",
+];
+
+const isModelNotFoundError = (error) => {
+  const message = (error?.message || "").toLowerCase();
+  return (
+    error?.status === 404 ||
+    message.includes("not found") ||
+    message.includes("is not found for api version") ||
+    message.includes("supported for generatecontent")
+  );
+};
 
 const getGeminiModel = () => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -10,9 +28,10 @@ const getGeminiModel = () => {
   }
 
   if (!geminiModel) {
-    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     const genAI = new GoogleGenerativeAI(apiKey);
     geminiModel = genAI.getGenerativeModel({ model: modelName });
+    resolvedModelName = modelName;
   }
 
   return geminiModel;
@@ -25,18 +44,48 @@ export const generateGeminiText = async ({
   maxOutputTokens = 256,
   responseMimeType,
 }) => {
-  const model = getGeminiModel();
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-    systemInstruction,
-    generationConfig: {
-      temperature,
-      maxOutputTokens,
-      ...(responseMimeType ? { responseMimeType } : {}),
-    },
-  });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new ApiError(500, "GEMINI_API_KEY is not set on the server");
+  }
 
-  return result.response.text()?.trim() || "";
+  const configuredModel = process.env.GEMINI_MODEL;
+  const candidates = configuredModel
+    ? [configuredModel, ...DEFAULT_MODEL_CANDIDATES.filter((m) => m !== configuredModel)]
+    : DEFAULT_MODEL_CANDIDATES;
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  let lastError;
+
+  for (const modelName of candidates) {
+    try {
+      const model =
+        geminiModel && resolvedModelName === modelName
+          ? geminiModel
+          : genAI.getGenerativeModel({ model: modelName });
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+        systemInstruction,
+        generationConfig: {
+          temperature,
+          maxOutputTokens,
+          ...(responseMimeType ? { responseMimeType } : {}),
+        },
+      });
+
+      geminiModel = model;
+      resolvedModelName = modelName;
+      return result.response.text()?.trim() || "";
+    } catch (error) {
+      lastError = error;
+      if (!isModelNotFoundError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError || new Error("No compatible Gemini model found for generateContent");
 };
 
 export const extractJsonText = (rawText) => {
