@@ -2,7 +2,7 @@ import asyncHandler from '../utils/Aysnchandler.js';
 import { ApiError } from '../utils/Apierror.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import AIQuery from "../models/AIQuery.js";
-import { generateGeminiText, mapGeminiError } from '../utils/geminiClient.js';
+import { generateGroqText, mapGroqError } from '../utils/groqClient.js';
 
 export const askBloodAssistant = asyncHandler(async (req, res) => {
   const { question } = req.body;
@@ -26,14 +26,14 @@ STRICT RULES:
 
   let answer;
   try {
-    answer = await generateGeminiText({
+    answer = await generateGroqText({
       systemInstruction: systemPrompt,
       userPrompt: question,
       temperature: 0.2,
       maxOutputTokens: 220,
     });
   } catch (error) {
-    throw mapGeminiError(error);
+    throw mapGroqError(error);
   }
 
   // Save for audit/logging

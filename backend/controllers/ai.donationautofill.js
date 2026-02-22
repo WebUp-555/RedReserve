@@ -1,7 +1,7 @@
 import asyncHandler from '../utils/Aysnchandler.js';
 import { ApiError } from '../utils/Apierror.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
-import { generateGeminiText, extractJsonText, mapGeminiError } from '../utils/geminiClient.js';
+import { generateGroqText, extractJsonText, mapGroqError } from '../utils/groqClient.js';
 
 export const parseDonationAppointmentAI = asyncHandler(async (req, res) => {
   const { text } = req.body;
@@ -39,15 +39,14 @@ Rules:
 
   let raw;
   try {
-    raw = await generateGeminiText({
+    raw = await generateGroqText({
       systemInstruction: systemPrompt,
       userPrompt: text,
       temperature: 0.1,
       maxOutputTokens: 220,
-      responseMimeType: "application/json",
     });
   } catch (error) {
-    throw mapGeminiError(error);
+    throw mapGroqError(error);
   }
 
   let data;
